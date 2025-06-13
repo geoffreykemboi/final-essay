@@ -1,0 +1,11 @@
+ALGORITHM use_if_else_statement_test
+VAR
+Ticket_Price:=20;
+  IF (age<=16) THEN
+    Ticket_Price := 10;
+  ELSE
+    Ticket_Price:= 20;
+      END_IF
+BEGIN
+  set_instructions
+END

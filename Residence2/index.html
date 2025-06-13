@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Residency Validation Form</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    label { display: block; margin-top: 10px; }
+    input, select { margin-top: 5px; padding: 5px; }
+    .error { color: red; margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+  <h2>Residency Validation for Policy Issuance</h2>
+
+  <form id="residencyForm">
+    <!-- 1. Resident Status -->
+    <label>Resident Status:</label>
+    <label><input type="radio" name="residentStatus" value="Resident"> Resident</label>
+    <label><input type="radio" name="residentStatus" value="Non-Resident"> Non-Resident</label>
+
+    <!-- 2. Country of Residence -->
+    <label for="country">Country of Residence:</label>
+    <select id="country">
+      <option value="">-- Select --</option>
+      <option value="Kenya">Kenya</option>
+      <option value="Uganda">Uganda</option>
+      <option value="Tanzania">Tanzania</option>
+    </select>
+
+    <!-- 3. Duration of Stay -->
+    <label for="duration">Planned Duration of Stay (months):</label>
+    <input type="number" id="duration" min="0">
+
+    <!-- 4. Actual Dates (Optional) -->
+    <label for="startDate">Start Date of Stay:</label>
+    <input type="date" id="startDate">
+
+    <label for="endDate">End Date of Stay:</label>
+    <input type="date" id="endDate">
+
+    <!-- 5. Declaration -->
+    <label>
+      <input type="checkbox" id="declaration">
+      I confirm that I will reside in the selected country for at least three months during the policy period.
+    </label>
+
+    <!-- Submit -->
+    <button type="submit">Submit</button>
+    <div class="error" id="errorMsg"></div>
+  </form>
+
+  <script>
+    const residencyRadios = document.querySelectorAll('input[name="residentStatus"]');
+    const countrySelect = document.getElementById('country');
+    const form = document.getElementById('residencyForm');
+    const errorMsg = document.getElementById('errorMsg');
+
+    function updateCountryFieldState() {
+      const selected = document.querySelector('input[name="residentStatus"]:checked');
+      if (!selected) return;
+      if (selected.value === 'Non-Resident') {
+        countrySelect.disabled = true;
+        countrySelect.value = '';
+      } else {
+        countrySelect.disabled = false;
+      }
+    }
+
+    residencyRadios.forEach(radio => {
+      radio.addEventListener('change', updateCountryFieldState);
+    });
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const residentStatus = document.querySelector('input[name="residentStatus"]:checked')?.value;
+      const country = countrySelect.value;
+      const duration = parseInt(document.getElementById('duration').value);
+      const start = new Date(document.getElementById('startDate').value);
+      const end = new Date(document.getElementById('endDate').value);
+      const declaration = document.getElementById('declaration').checked;
+
+      errorMsg.textContent = "";
+
+      if (!residentStatus || (!country && residentStatus !== 'Non-Resident') || isNaN(duration) || !declaration) {
+        errorMsg.textContent = "Please fill all required fields and confirm residency declaration.";
+        return;
+      }
+
+      if (residentStatus === "Non-Resident") {
+        errorMsg.textContent = "Policy issuance is not allowed for Non-Residents.";
+        return;
+      }
+
+      if (country !== "Kenya") { // Adjust issuing country check as needed
+        errorMsg.textContent = "Country of residence must match issuing country (Kenya).";
+        return;
+      }
+
+      if (duration < 3) {
+        errorMsg.textContent = "Planned duration of stay must be at least 3 months.";
+        return;
+      }
+
+      if (!isNaN(start) && !isNaN(end)) {
+        const monthDiff = (end - start) / (1000 * 60 * 60 * 24 * 30);
+        if (monthDiff < 3) {
+          errorMsg.textContent = "Actual stay duration must be at least 3 months.";
+          return;
+        }
+      }
+
+      alert("Validation passed. Policy can be issued.");
+    });
+  </script>
+
+</body>
+</html>
